@@ -12,9 +12,9 @@ const app = express();
 
 // Debug: Log environment on startup
 console.log('🔍 Environment Check:');
-console.log('✓ MONGODB_URI configured:', !!process.env.MONGODB_URI);
-console.log('✓ NEWS_API_KEY configured:', !!process.env.NEWS_API_KEY);
-console.log('✓ PORT configured:', process.env.PORT || '5000');
+console.log('✓ MONGODB_URI defined:', !!process.env.MONGODB_URI);
+console.log('✓ NEWS_API_KEY defined:', !!process.env.NEWS_API_KEY);
+console.log('✓ PORT:', process.env.PORT || '5000');
 
 // CORS configuration for Vercel deployment
 const corsOptions = {
@@ -32,46 +32,58 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json()); 
 
-// Health check endpoint
+// Global connection state
+let mongodbConnected = false;
+
+// Health check endpoint - always works
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    mongodb: mongodbConnected ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
 });
 
-// MongoDB connection with better error handling
+// MongoDB connection - non-blocking
 const connectMongoDB = async () => {
+  if (mongodbConnected) return;
+  
   try {
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
+      console.warn('⚠️  MONGODB_URI is not configured');
+      return;
     }
+    
+    console.log('🔗 Connecting to MongoDB...');
     
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
+    
+    mongodbConnected = true;
     console.log('✅ MongoDB connected successfully');
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.error('Full error:', err);
-    // Don't exit immediately, allow API to work with cached data
-    setTimeout(connectMongoDB, 5000); // Retry after 5 seconds
+    mongodbConnected = false;
+    console.warn('⚠️  MongoDB connection failed:', err.message);
+    // Don't exit, allow API to work without database
+    // Retry after 10 seconds
+    setTimeout(connectMongoDB, 10000);
   }
 };
 
+// Connect to MongoDB but don't wait for it
 connectMongoDB();
 
 app.use('/api/news', newsRoutes);
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'News Aggregator API',
+    message: 'News Aggregator API ✅',
     status: 'running',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    mongodb: mongodbConnected ? 'connected' : 'connecting...',
     endpoints: {
       'GET /': 'API status and info',
       'GET /health': 'Health check',
@@ -83,15 +95,18 @@ app.get('/', (req, res) => {
   });
 });
 
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: 'Route not found',
+    path: req.path
   });
 });
 
+// Global error handler
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
+  console.error('❌ Server error:', err);
   res.status(500).json({
     success: false,
     message: 'Internal server error',
@@ -100,9 +115,17 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 API available at http://localhost:${PORT}`);
-  console.log(`📰 Test endpoint: http://localhost:${PORT}/api/news`);
-  console.log(`💪 Health check: http://localhost:${PORT}/health`);
-});
+
+// Start server
+try {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 News Aggregator API started`);
+    console.log(`📡 Server running on port ${PORT}`);
+    console.log(`🔗 Root: http://localhost:${PORT}`);
+    console.log(`💪 Health: http://localhost:${PORT}/health`);
+    console.log(`📰 News: http://localhost:${PORT}/api/news\n`);
+  });
+} catch (err) {
+  console.error('❌ Failed to start server:', err);
+  process.exit(1);
+}
