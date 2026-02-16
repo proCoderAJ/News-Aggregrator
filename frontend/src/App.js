@@ -6,7 +6,12 @@ import FilterBar from './components/FilterBar';
 import ArticleList from './components/ArticleList';
 import './App.css';
 
+// Debug: Log the API URL being used
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/news';
+console.log('📡 API URL:', API_URL);
+console.log('🔍 Environment Variables:', {
+  REACT_APP_API_URL: process.env.REACT_APP_API_URL
+});
 
 function App() {
 
