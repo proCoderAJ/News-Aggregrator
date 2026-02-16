@@ -7,8 +7,12 @@ import ArticleList from './components/ArticleList';
 import './App.css';
 
 // Debug: Log the API URL being used
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/news';
+// Use new backend URL directly as fallback since Vercel env vars aren't reliable
+const BACKEND_URL = 'https://news-aggregrator-backend-9tlc95n1v-procoderajs-projects.vercel.app';
+const API_URL = process.env.REACT_APP_API_URL || `${BACKEND_URL}/api/news`;
+
 console.log('📡 API URL:', API_URL);
+console.log('🔍 Backend URL:', BACKEND_URL);
 console.log('🔍 Environment Variables:', {
   REACT_APP_API_URL: process.env.REACT_APP_API_URL
 });

@@ -21,6 +21,7 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:5000',
+    'https://news-aggregrator-frontend-65ghfgwdw-procoderajs-projects.vercel.app',
     'https://news-aggregrator-frontend-aao53nqe7-procoderajs-projects.vercel.app',
     process.env.FRONTEND_URL || 'http://localhost:3000'
   ],
