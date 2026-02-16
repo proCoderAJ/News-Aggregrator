@@ -32,7 +32,14 @@ router.get('/', async (req, res) => {
 
 router.get('/fetch', async (req, res) => {
   try {
+    // Check if API key is configured
+    if (!process.env.NEWS_API_KEY) {
+      throw new Error('NEWS_API_KEY environment variable is not configured');
+    }
+
     const { category = 'general', country = 'us' } = req.query;
+    
+    console.log(`📡 Fetching news from NewsAPI - Category: ${category}, Country: ${country}`);
     
     const response = await axios.get('https://newsapi.org/v2/top-headlines', {
       params: {
@@ -40,14 +47,17 @@ router.get('/fetch', async (req, res) => {
         category: category,
         apiKey: process.env.NEWS_API_KEY,
         pageSize: 20
-      }
+      },
+      timeout: 10000
     });
 
     if (response.data.status !== 'ok') {
-      throw new Error('NewsAPI returned an error');
+      throw new Error(`NewsAPI error: ${response.data.message || 'Unknown error'}`);
     }
 
-    const articles = response.data.articles;
+    const articles = response.data.articles || [];
+    console.log(`✅ Received ${articles.length} articles from NewsAPI`);
+    
     const savedArticles = [];
 
     for (const article of articles) {
@@ -77,7 +87,6 @@ router.get('/fetch', async (req, res) => {
         }
       } catch (err) {
         console.error('Error saving article:', err.message);
-  
       }
     }
 
@@ -89,8 +98,10 @@ router.get('/fetch', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching from NewsAPI:', error.message);
+    console.error('❌ Error fetching from NewsAPI:', error.message);
+    console.error('Full error:', error);
     
+    // Fallback to cached articles
     try {
       const { category = 'general' } = req.query;
       const cachedArticles = await Article.find(
@@ -99,19 +110,25 @@ router.get('/fetch', async (req, res) => {
         .sort({ publishedAt: -1 })
         .limit(50);
       
-      res.json({
-        success: true,
-        message: 'NewsAPI unavailable. Showing cached articles instead.',
-        count: cachedArticles.length,
-        data: cachedArticles
-      });
+      if (cachedArticles.length > 0) {
+        return res.json({
+          success: true,
+          message: 'NewsAPI unavailable. Showing cached articles instead.',
+          count: cachedArticles.length,
+          data: cachedArticles
+        });
+      }
     } catch (fallbackError) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch articles from NewsAPI and no cached articles available',
-        error: error.message
-      });
+      console.error('Fallback error:', fallbackError.message);
     }
+
+    // If we get here, neither fresh nor cached articles are available
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch articles',
+      error: error.message,
+      details: 'Check backend logs. Verify NEWS_API_KEY is set in environment variables.'
+    });
   }
 });
 

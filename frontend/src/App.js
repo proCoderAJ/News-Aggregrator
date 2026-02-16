@@ -49,19 +49,31 @@ function App() {
       setLoading(true);
       setError(null);
       
+      console.log(`🔄 Fetching news from: ${API_URL}/fetch`);
       const response = await axios.get(`${API_URL}/fetch`, {
-        params: { category: category !== 'all' ? category : 'general' }
+        params: { category: category !== 'all' ? category : 'general' },
+        timeout: 10000
       });
+      
+      console.log('📡 Response:', response.data);
       
       if (response.data.success) {
         setArticles(response.data.data);
         alert(`✅ Fetched ${response.data.count} articles!`);
       } else {
-        setError('Failed to fetch latest news');
+        setError(`Failed to fetch: ${response.data.message || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error('Error fetching latest news:', err);
-      setError('Failed to fetch news. Check your API key and internet connection.');
+      console.error('❌ Error fetching latest news:', err);
+      
+      let errorMessage = 'Failed to fetch news.';
+      if (err.response?.data?.error) {
+        errorMessage += ` Backend says: ${err.response.data.error}`;
+      } else if (err.message) {
+        errorMessage += ` ${err.message}`;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
