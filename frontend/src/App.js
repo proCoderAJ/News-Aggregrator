@@ -8,14 +8,13 @@ import './App.css';
 
 // Debug: Log the API URL being used
 // Using Render backend
-const BACKEND_URL = 'https://news-aggregrator-backend.onrender.com';
-const API_URL = process.env.REACT_APP_API_URL || `${BACKEND_URL}/api/news`;
+const BACKEND_BASE_URL = 'https://news-aggregrator-backend.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL || `${BACKEND_BASE_URL}/api/news`;
 
 console.log('📡 API URL:', API_URL);
-console.log('🔍 Backend URL:', BACKEND_URL);
-console.log('🔍 Environment Variables:', {
-  REACT_APP_API_URL: process.env.REACT_APP_API_URL
-});
+console.log('🔍 Backend Base URL:', BACKEND_BASE_URL);
+console.log('🔍 Environment Variable REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+console.log('🔍 Using fallback:', !process.env.REACT_APP_API_URL);
 
 function App() {
 
