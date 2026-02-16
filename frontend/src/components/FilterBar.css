@@ -1,0 +1,145 @@
+
+.filter-bar {
+  background: white;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #2563eb;
+}
+
+.search-btn {
+  padding: 12px 20px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: background 0.3s ease;
+}
+
+.search-btn:hover {
+  background: #1d4ed8;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 140px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.clear-btn:hover {
+  background: #dc2626;
+}
+
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-filter label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.category-select {
+  padding: 12px 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.category-select:focus {
+  border-color: #2563eb;
+}
+
+.refresh-btn {
+  padding: 12px 20px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: #059669;
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-form {
+    min-width: 100%;
+  }
+
+  .category-filter {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .category-select {
+    flex: 1;
+  }
+
+  .refresh-btn {
+    width: 100%;
+  }
+  
+  .clear-btn {
+    right: 10px;
+  }
+}
