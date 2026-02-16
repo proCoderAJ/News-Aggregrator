@@ -10,7 +10,17 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors()); 
+// CORS configuration for Vercel deployment
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    process.env.FRONTEND_URL || 'http://localhost:3000'
+  ],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json()); 
 
 mongoose.connect(process.env.MONGODB_URI, {

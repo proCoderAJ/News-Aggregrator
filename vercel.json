@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "news-aggregator-backend",
+      "rootDirectory": "backend"
+    },
+    {
+      "name": "news-aggregator-frontend",
+      "rootDirectory": "frontend"
+    }
+  ]
+}
